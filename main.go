@@ -9,5 +9,7 @@ func main() {
         FilePath: "",
     } 
 
-    fileHandler.ReadFromFile()
+    mdParser := handlers.Parser{}
+
+    mdParser.ConvertFileToMarkdown(fileHandler)
 }

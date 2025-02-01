@@ -1,74 +1,51 @@
 package handlers
 
 import (
-	"fmt"
-	"io"
 	"log"
 	"os"
-	"strings"
+	"bufio"
 )
 
+/*
+	File Handler structure creates a handler abstraction for handling file operations 
+*/
 type FileHandler struct {
-	FileName string
-	FilePath string
-	reader io.Reader
-	//writer io.Writer
+	FileName string // Name of the file
+	FilePath string // Path to the given file
 }
 
 
-func (f FileHandler) openFile() (*os.File) {
-	//join the files
-	path := []string{f.FilePath,f.FileName};
-	pathToFile := strings.Join(path,"")
 
-	file,err :=os.Open(pathToFile)
 
-	if err!=nil{
-		log.Fatal(err)
-		panic(err)
-		
-	}
-
-	return file
-}
 
 /*
-	@description reads data from file
+	Reads data from a file and returns the contents of the file or error
 */
-func (f FileHandler) ReadFromFile() (string, error) {
-	buffer := make([]byte,1024)
-	f.reader=f.openFile()
+func (f FileHandler) ReadFile() ([]string, error) {
+	file,f_err :=os.Open(f.FilePath+f.FileName)
 
-
-	line :=""
-	lines := []string{}
-	for {
-
-		n,err := f.reader.Read(buffer)
+	if f_err!=nil {
+		log.Fatal(f_err)
+		panic(f_err)
 		
-		for  index,data := range buffer[:n] {
-			if string(rune(data))=="\n" || index==n {
-				fmt.Println(line)
-				lines=append(lines,line)
-			
-				line=""
-			}else {
-				line+=string(rune(data))
-			}
-		}
-
-		fmt.Println(lines)
-
-
-		//check if reached the end of file
-		if err==io.EOF{
-			return "",nil
-		}
-
-		//if there is some other error
-		if err!=nil {
-			return "err",err
-		}
 	}
+
+	defer file.Close()
+
+	lines :=make([]string,0)
+
+	//Initialize a buffer for holding data
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+
+		line:=scanner.Text()
+		lines=append(lines,line)
+		
+	}
+
+
+	return lines,nil
 }
+
 
